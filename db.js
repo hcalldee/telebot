@@ -10,7 +10,7 @@ connection.connect((err) => {
   }
   console.log('Connected to database successfully.');
 });
-//haha
+//hahahihi
 function insertData(data) {
     return new Promise((resolve, reject) => {
         const { id, username, tanggal, sub_judul, durasi, perihal } = data;
