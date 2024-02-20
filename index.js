@@ -38,6 +38,7 @@ function convertTextToJson(text, username) {
         const currentDate = new Date().toISOString().slice(0, 10);
         const lines = text.split('\n').filter(line => line.trim() !== '');
         const id = lines.find(line => line.includes('NIK')).split(':')[1].trim();
+        const tanggal = lines.find(line => line.includes('Tanggal')).split(':')[1].trim();
         const durasiLine = lines.find(line => line.includes('Durasi'));
         const durasi = durasiLine.slice(durasiLine.indexOf(':') + 1).trim();
         const perihalIndex = lines.findIndex(line => line.includes('Perihal'));
@@ -48,9 +49,9 @@ function convertTextToJson(text, username) {
         }
         const perihal = perihalLines.join('\n'); // Join all perihal lines with newline character
         const result = {
-            id: generateRandomId(id, currentDate),
+            id: generateRandomId(id, tanggal),
             username: username,
-            tanggal: currentDate,
+            tanggal: tanggal,
             durasi: durasi,
             sub_judul : perihal.substring(0, 20),
             perihal: perihal
@@ -114,9 +115,12 @@ function jsonToHtml(dataArray) {
 bot.on('message', (msg) => {
   const chatId = msg.chat.id;
   const messageText = msg.text;
-  const user = msg.from.username
-//   const user = msg.chat.username
-//   console.log(msg);
+  let user 
+  if(msg.chat.type == 'group'){
+    user = msg.from.username
+  }else{
+    user = msg.chat.username
+  }
 
     if(messageText==='/get iplist'){
         // Select all messages from the database
@@ -145,12 +149,11 @@ bot.on('message', (msg) => {
     else if(messageText==='/set lembur'){
         db.connection.query(`SELECT * FROM user_it where username = "${user}";`, (error, results, fields) => {
             if (error) {
-            console.error('Error selecting messages from database:', error);
-            return;
+                console.error('Error selecting messages from database:', error);
+                return;
             }
             let data = results[0]
-            // bot.sendMessage(chatId, `data IP addres user RSPelita: \n ${info.join('\n')}`);
-            bot.sendMessage(chatId, `berikut contoh form lembur\n\n*form_lembur \nNama : ${data.Nama}\nNIK : ${data.NIK}\nJabatan : Staff IT \nDurasi : \nPerihal :\n`);
+            bot.sendMessage(chatId, `berikut contoh form lembur\n\n*form_lembur \nNama : ${data.Nama}\nNIK : ${data.NIK}\nJabatan : Staff IT \nTanggal : ${new Date().toISOString().slice(0, 10)}\nDurasi : \nPerihal :\n`);
         });
     }else if(messageText.includes('*form_lembur')){
         db.insertData(convertTextToJson(messageText, user))
