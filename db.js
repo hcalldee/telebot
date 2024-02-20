@@ -29,7 +29,31 @@ function insertData(data) {
     });
 }
 
+function editData(id, data) {
+    return new Promise((resolve, reject) => {
+        const {tanggal, sub_judul, durasi, perihal } = data;
+        const sql = "UPDATE lembur_it SET tanggal = ?, sub_judul = ?, durasi = ?, perihal = ? WHERE id = ?";
+        const values = [tanggal, sub_judul, durasi, perihal, id];
+
+        connection.query(sql, values, (err, result) => {
+            if (err) {
+                console.error('Error updating data:', err);
+                reject(err);
+            } else {
+                if (result.affectedRows > 0) {
+                    console.log('Data updated successfully.');
+                    resolve('success');
+                } else {
+                    console.log('No record found for the given id:', id);
+                    resolve('not_found');
+                }
+            }
+        });
+    });
+}
+
 module.exports = {
     connection,
-    insertData
+    insertData,
+    editData
 };

@@ -155,7 +155,20 @@ bot.on('message', (msg) => {
             let data = results[0]
             bot.sendMessage(chatId, `berikut contoh form lembur\n\n*form_lembur \nNama : ${data.Nama}\nNIK : ${data.NIK}\nJabatan : Staff IT \nTanggal : ${new Date().toISOString().slice(0, 10)}\nDurasi : \nPerihal :\n`);
         });
-    }else if(messageText.includes('*form_lembur')){
+    }else if(messageText.includes('/edit lembur')){
+        let id = messageText.split(':')[1].replace(/^\s+|\s+$/gm,'')
+        let query =`SELECT * FROM lembur_it AS a JOIN user_it AS b ON a.username = b.username where a.id = "${id}";`
+        db.connection.query(query, (error, results, fields) => {
+            if (error) {
+                console.error('Error selecting messages from database:', error);
+                return;
+            }
+            let data = results[0]
+            console.log(results);
+            bot.sendMessage(chatId, `berikut contoh form lembur\n\n*form_edit_lembur-${data.id}\nNama : ${data.Nama}\nNIK : ${data.NIK}\nJabatan : Staff IT \nTanggal : ${data.tanggal}\nDurasi : ${data.durasi}\nPerihal :\n${data.perihal}`);
+        });
+    }
+    else if(messageText.includes('*form_lembur')){
         db.insertData(convertTextToJson(messageText, user))
         .then(result => {
             bot.sendMessage(chatId, "data berhasil disimpan")
@@ -165,7 +178,25 @@ bot.on('message', (msg) => {
             let info = String(error)
             info.includes("ER_DUP_ENTRY")?bot.sendMessage(chatId, "data sudah ada silahkan diubah jika ingin mengubah data"):bot.sendMessage(chatId, info.substring(0,10));
         });
-    }else if(messageText==='/lembur saya'){
+    }
+    else if(messageText.includes('*form_edit_lembur')){
+        let id = convertTextToJson(messageText, user).id
+        let data = convertTextToJson(messageText, user)
+        delete data.id;
+        delete data.username;
+
+        
+        db.editData(id,data)
+        .then(result => {
+            bot.sendMessage(chatId, "data berhasil diubah")
+        })
+        .catch(error => {
+            console.error(error);
+            let info = String(error)
+            info.includes("ER_DUP_ENTRY")?bot.sendMessage(chatId, "data sudah ada silahkan diubah jika ingin mengubah data"):bot.sendMessage(chatId, info.substring(0,10));
+        });
+    }
+    else if(messageText==='/lembur saya'){
         db.connection.query(`SELECT * FROM lembur_it where username = "${user}" order by tanggal desc limit 10;`, (error, results, fields) => {
             if (error) {
             console.error('Error selecting messages from database:', error);
