@@ -131,7 +131,18 @@ bot.on('message', (msg) => {
             });
             bot.sendMessage(chatId, `data IP addres user RSPelita: \n ${info.join('\n')}`);
         });
-    }else if(messageText==='/set lembur'){
+    }
+    else if(messageText==='/set iplist'){    
+        bot.sendMessage(chatId, `http://192.168.1.227/ITUtl/`);
+    }
+    else if(messageText==='/get remote list'){    
+        bot.sendMessage(chatId, `list anydesk remot\n\n210766838 inacb\n269900226 linux server\n1867185632 linux proxmox\n953790503 win proxmox\n1819903078 adminakre`);
+    }
+    else if(messageText==='/help'){    
+        let info = "help:\n\n`/get iplist`\n\tliat semua ip list di pelita\n\n```/set iplist```\n\tcrud semua ip list di pelita\n\n ```/set lembur```\n\tbikin lemburan unit it\n\n```/lembur saya```\n\tliat lemburan unit it\n\n```/get remote list```\n\tliat list remote pc"
+        bot.sendMessage(chatId, info,{ parseMode: 'Markdown' });
+    }
+    else if(messageText==='/set lembur'){
         db.connection.query(`SELECT * FROM user_it where username = "${user}";`, (error, results, fields) => {
             if (error) {
             console.error('Error selecting messages from database:', error);
