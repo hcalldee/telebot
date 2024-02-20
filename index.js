@@ -143,7 +143,7 @@ bot.on('message', (msg) => {
         bot.sendMessage(chatId, `list anydesk remot\n\n210766838 inacb\n269900226 linux server\n1867185632 linux proxmox\n953790503 win proxmox\n1819903078 adminakre`);
     }
     else if(messageText==='/help'){    
-        let info = "help:\n\n`/get iplist`\n\tliat semua ip list di pelita\n\n```/set iplist```\n\tcrud semua ip list di pelita\n\n ```/set lembur```\n\tbikin lemburan unit it\n\n```/lembur saya```\n\tliat lemburan unit it\n\n```/get remote list```\n\tliat list remote pc"
+        let info = "help:\n\n/get iplist\n\tliat semua ip list di pelita\n\n/set iplist\n\tcrud semua ip list di pelita\n\n /set lembur\n\tbikin lemburan unit it\n\n/lembur saya\n\tliat lemburan unit it\n\n/edit lembur : NIK_tgl\n\tedit lemburan, id lembur liat di lembur saya\n\n/get remote list\n\tliat list remote pc"
         bot.sendMessage(chatId, info,{ parseMode: 'Markdown' });
     }
     else if(messageText==='/set lembur'){
