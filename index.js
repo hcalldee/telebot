@@ -6,6 +6,9 @@ const bot = new TelegramBot(config.telegramBotToken, { polling: true });
 const prettier = require('prettier');
 const puppeteer = require('puppeteer');
 const fs = require('fs');
+const GitHubIssueCreator = require('./issuemodule');
+const { githubAccessToken } = require('./config');
+const githubIssueCreator = new GitHubIssueCreator(githubAccessToken);
 
 async function generateImage(htmlContent, outputFilePath) {
     const browser = await puppeteer.launch();
@@ -31,6 +34,29 @@ async function generateImage(htmlContent, outputFilePath) {
 function generateRandomId(id, date) {
     const formattedDate = date.replace(/-/g, ''); // Remove dashes from the date string
     return `${id}_${formattedDate}`;
+}
+
+function convertTextToJson2(text) {
+    try {
+        const currentDate = new Date().toISOString().slice(0, 10);
+        const lines = text.split('\n').filter(line => line.trim() !== '');
+        const jenis = lines.find(line => line.includes('Jenis')).split(':')[1].trim();
+        const keteranganIndex = lines.findIndex(line => line.includes('Keterangan'));
+        const keteranganLines = [];
+        for (let i = keteranganIndex + 1; i < lines.length; i++) {
+            if (lines[i].trim() === '') break; // Stop if an empty line is encountered
+            keteranganLines.push(lines[i].trim());
+        }
+        const perihal = keteranganLines.join('\n'); // Join all perihal lines with newline character
+        const result = {
+            jenis : jenis,
+            sub_judul : perihal.substring(0, 20),
+            perihal: perihal
+        };
+        return result;
+    } catch (error) {
+        console.error("An error occurred:", error.message);
+    }
 }
 
 function convertTextToJson(text, username) {
@@ -72,6 +98,8 @@ function convertDateToTimezone(dateString, timezone='Asia/Makassar') {
     const formattedDate = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
     return formattedDate;
 }
+
+
 
 function jsonToHtml(dataArray) {
     // return jsonToTable(dataArray);
@@ -145,6 +173,16 @@ bot.on('message', (msg) => {
     else if(messageText==='/help'){    
         let info = "help:\n\n/get iplist\n\tliat semua ip list di pelita\n\n/set iplist\n\tcrud semua ip list di pelita\n\n /set lembur\n\tbikin lemburan unit it\n\n/lembur saya\n\tliat lemburan unit it\n\n/edit lembur : NIK_tgl\n\tedit lemburan, id lembur liat di lembur saya\n\n/get remote list\n\tliat list remote pc"
         bot.sendMessage(chatId, info,{ parseMode: 'Markdown' });
+    }else if(messageText==='/lapor_issue_mlite'){
+        // githubIssueCreator.createIssue('hcalldee', 'mlite_rspi', 'module a error', 'module error ketika a', ['bug']);
+        bot.sendMessage(chatId, `berikut contoh form laporan\n\n*form_laporan \nNama : \nUnit : \nTanggal : ${new Date().toISOString().slice(0, 10)}\nJenis : permintaan/error (pilih salah satu)\nKeterangan :\n`);
+        // bot.sendMessage(chatId, 'laporan diterima dan dikirim ke Repositori,\n terimakasih atas kontribusi anda');
+    }
+    else if(messageText.includes('*form_laporan')){
+        console.log(convertTextToJson2(messageText)); 
+        data = convertTextToJson2(messageText)
+        githubIssueCreator.createIssue('hcalldee', 'mlite_rspi', data.sub_judul, data.perihal, [data.jenis]);
+        bot.sendMessage(chatId, 'laporan diterima dan dikirim ke Repositori,\n terimakasih atas kontribusi anda');
     }
     else if(messageText==='/set lembur'){
         db.connection.query(`SELECT * FROM user_it where username = "${user}";`, (error, results, fields) => {
