@@ -10,6 +10,10 @@ const GitHubIssueCreator = require('./issuemodule');
 const { githubAccessToken } = require('./config');
 const githubIssueCreator = new GitHubIssueCreator(githubAccessToken);
 
+const CRUDModule = require('./catatan_infras');
+
+const crudModule = new CRUDModule(db.connection);
+
 async function generateImage(htmlContent, outputFilePath) {
     const browser = await puppeteer.launch();
     const page = await browser.newPage();
@@ -26,7 +30,6 @@ async function generateImage(htmlContent, outputFilePath) {
 
     // Take a screenshot of the table
     await page.screenshot({ path: outputFilePath });
-
     await browser.close();
 }
 
@@ -52,6 +55,28 @@ function convertTextToJson2(text) {
             jenis : jenis,
             sub_judul : perihal.substring(0, 20),
             perihal: perihal
+        };
+        return result;
+    } catch (error) {
+        console.error("An error occurred:", error.message);
+    }
+}
+
+function convertTextToJson3(text) {
+    try {
+        const currentDate = new Date().toISOString().slice(0, 10);
+        const lines = text.split('\n').filter(line => line.trim() !== '');
+        const judul = lines.find(line => line.includes('Judul')).split(':')[1].trim();
+        const keteranganIndex = lines.findIndex(line => line.includes('Ket'));
+        const keteranganLines = [];
+        for (let i = keteranganIndex + 1; i < lines.length; i++) {
+            if (lines[i].trim() === '') break; // Stop if an empty line is encountered
+            keteranganLines.push(lines[i].trim());
+        }
+        const perihal = keteranganLines.join('\n'); // Join all perihal lines with newline character
+        const result = {
+            judul : judul,
+            Ket: perihal
         };
         return result;
     } catch (error) {
@@ -166,6 +191,15 @@ bot.on('message', (msg) => {
     }
     else if(messageText==='/set iplist'){    
         bot.sendMessage(chatId, `http://192.168.1.227/ITUtl/`);
+    }
+    else if(messageText==='/set info'){
+        bot.sendMessage(chatId, `berikut contoh buat catatan kode mikrotik\n\n*catatan_kode \nJudul : \nKet :\n`);
+    }
+    else if(messageText.includes('*catatan_kode')){
+        console.log(convertTextToJson3(messageText)); 
+        data = convertTextToJson3(messageText)
+        crudModule.create(data)
+        bot.sendMessage(chatId, `catatan kode berhasil disimpan`);
     }
     else if(messageText==='/get remote list'){    
         bot.sendMessage(chatId, `list anydesk remot\n\n210766838 inacb\n269900226 linux server\n1867185632 linux proxmox\n953790503 win proxmox\n1819903078 adminakre`);
