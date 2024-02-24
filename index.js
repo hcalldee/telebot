@@ -210,7 +210,7 @@ bot.on('message', (msg) => {
     user = msg.chat.username
   }
 
-    if(messageText==='/get iplist'){
+    if(messageText==='/get_iplist'){
         // Select all messages from the database
         db.connection.query('SELECT * FROM IpList ', (error, results, fields) => {
             if (error) {
@@ -231,7 +231,7 @@ bot.on('message', (msg) => {
             bot.sendMessage(chatId, `Unauthorized`);
         }
     }
-    else if(messageText==='/set iplist'){    
+    else if(messageText==='/set_iplist'){    
         bot.sendMessage(chatId, `http://192.168.1.227/ITUtl/`);
     }
     else if(messageText==='/set info'){
@@ -243,11 +243,11 @@ bot.on('message', (msg) => {
         crudModule.create(data)
         bot.sendMessage(chatId, `catatan kode berhasil disimpan`);
     }
-    else if(messageText==='/get remote list'){    
+    else if(messageText==='/get_remote_list'){    
         bot.sendMessage(chatId, `list anydesk remot\n\n210766838 inacb\n269900226 linux server\n1867185632 linux proxmox\n953790503 win proxmox\n1819903078 adminakre`);
     }
-    else if(messageText==='/help'){    
-        let info = "help:\n\n/get iplist\n\tliat semua ip list di pelita\n\n/set iplist\n\tcrud semua ip list di pelita\n\n /set lembur\n\tbikin lemburan unit it\n\n/lembur saya\n\tliat lemburan unit it\n\n/edit lembur : NIK_tgl\n\tedit lemburan, id lembur liat di lembur saya\n\n/get remote list\n\tliat list remote pc"
+    else if(messageText==='/help' || messageText.includes('/help')){    
+        let info = "help:\n\n/get_iplist\n\tliat semua ip list di pelita\n\n/set_iplist\n\tcrud semua ip list di pelita\n\n /set_lembur\n\tbikin lemburan unit it\n\n/lembur_saya\n\tliat lemburan unit it\n\n/edit lembur : NIK_tgl\n\tedit lemburan, id lembur liat di lembur saya\n\n/get_remote_list\n\tliat list remote pc"
         bot.sendMessage(chatId, info,{ parseMode: 'Markdown' });
     }else if(messageText==='/lapor_issue_mlite'){
         // githubIssueCreator.createIssue('hcalldee', 'mlite_rspi', 'module a error', 'module error ketika a', ['bug']);
@@ -260,7 +260,7 @@ bot.on('message', (msg) => {
         githubIssueCreator.createIssue('hcalldee', 'mlite_rspi', data.sub_judul, data.perihal, [data.jenis]);
         bot.sendMessage(chatId, 'laporan diterima dan dikirim ke Repositori,\n terimakasih atas kontribusi anda');
     }
-    else if(messageText==='/set lembur'){
+    else if(messageText==='/set_lembur'){
         db.connection.query(`SELECT * FROM user_it where username = "${user}";`, (error, results, fields) => {
             if (error) {
                 console.error('Error selecting messages from database:', error);
@@ -314,7 +314,7 @@ bot.on('message', (msg) => {
             info.includes("ER_DUP_ENTRY")?bot.sendMessage(chatId, "data sudah ada silahkan diubah jika ingin mengubah data"):bot.sendMessage(chatId, info.substring(0,10));
         });
     }
-    else if(messageText==='/lembur saya'){
+    else if(messageText==='/lembur_saya'){
         db.connection.query(`SELECT * FROM lembur_it where username = "${user}" order by tanggal desc limit 10;`, (error, results, fields) => {
             if (error) {
             console.error('Error selecting messages from database:', error);
@@ -335,5 +335,8 @@ bot.on('message', (msg) => {
             })
             .catch(err => console.error('Error generating image:', err));
         });
+    }
+    else{
+        bot.sendMessage(chatId, 'klik ini : /help');
     }
 });
