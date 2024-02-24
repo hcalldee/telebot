@@ -165,7 +165,42 @@ function jsonToHtml(dataArray) {
     return html;
 }
 
+function deleteAllMessages(chatId) {
+    sentMessageIds.forEach((messageId) => {
+        bot.deleteMessage(chatId, messageId)
+            .then(() => {
+                console.log(`Message ${messageId} deleted successfully`);
+            })
+            .catch((error) => {
+                console.error(`Error deleting message ${messageId}:`, error.response.body);
+            });
+    });
+}
+
+function extractIdFromMessage(messageText) {
+    if (typeof messageText !== 'string') {
+        console.error("format yang benar \"nik:tanggal\" tanpa strip\n contoh /edit lembur : 474.100822_20240223");
+        return null;
+    }
+
+    if (!messageText.includes(":")) {
+        console.error("format yang benar \"nik:tanggal\" tanpa strip\n contoh /edit lembur : 474.100822_20240223");
+        return null;
+    }
+
+    const parts = messageText.split(':');
+
+    if (parts.length < 2) {
+        console.error("format yang benar \"nik:tanggal\" tanpa strip\n contoh /edit lembur : 474.100822_20240223");
+        return null;
+    }
+
+    const id = parts[1].trim();
+    return id;
+}
+
 bot.on('message', (msg) => {
+
   const chatId = msg.chat.id;
   const messageText = msg.text;
   let user 
@@ -188,6 +223,13 @@ bot.on('message', (msg) => {
             });
             bot.sendMessage(chatId, `data IP addres user RSPelita: \n ${info.join('\n')}`);
         });
+    }
+    else if(messageText==='/clear'){
+        if(user=='hcalldee'){
+            deleteAllMessages(chatId);
+        }else{
+            bot.sendMessage(chatId, `Unauthorized`);
+        }
     }
     else if(messageText==='/set iplist'){    
         bot.sendMessage(chatId, `http://192.168.1.227/ITUtl/`);
@@ -228,17 +270,21 @@ bot.on('message', (msg) => {
             bot.sendMessage(chatId, `berikut contoh form lembur\n\n*form_lembur \nNama : ${data.Nama}\nNIK : ${data.NIK}\nJabatan : Staff IT \nTanggal : ${new Date().toISOString().slice(0, 10)}\nDurasi : \nPerihal :\n`);
         });
     }else if(messageText.includes('/edit lembur')){
-        let id = messageText.split(':')[1].replace(/^\s+|\s+$/gm,'')
-        let query =`SELECT * FROM lembur_it AS a JOIN user_it AS b ON a.username = b.username where a.id = "${id}";`
-        db.connection.query(query, (error, results, fields) => {
-            if (error) {
-                console.error('Error selecting messages from database:', error);
-                return;
-            }
-            let data = results[0]
-            console.log(results);
-            bot.sendMessage(chatId, `berikut contoh form lembur\n\n*form_edit_lembur-${data.id}\nNama : ${data.Nama}\nNIK : ${data.NIK}\nJabatan : Staff IT \nTanggal : ${data.tanggal}\nDurasi : ${data.durasi}\nPerihal :\n${data.perihal}`);
-        });
+        let id = extractIdFromMessage(messageText);
+        if(id==null){
+            bot.sendMessage(chatId, `format yang benar \"nik:tanggal\" tanpa strip\n contoh:\n /edit lembur : 474.100822_20240223`);
+        }else{
+            let query =`SELECT * FROM lembur_it AS a JOIN user_it AS b ON a.username = b.username where a.id = "${id}";`
+            db.connection.query(query, (error, results, fields) => {
+                if (error) {
+                    console.error('Error selecting messages from database:', error);
+                    return;
+                }
+                let data = results[0]
+                console.log(results);
+                bot.sendMessage(chatId, `berikut contoh form lembur\n\n*form_edit_lembur-${data.id}\nNama : ${data.Nama}\nNIK : ${data.NIK}\nJabatan : Staff IT \nTanggal : ${data.tanggal}\nDurasi : ${data.durasi}\nPerihal :\n${data.perihal}`);
+            });
+        }
     }
     else if(messageText.includes('*form_lembur')){
         db.insertData(convertTextToJson(messageText, user))
