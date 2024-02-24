@@ -232,7 +232,7 @@ bot.on('message', (msg) => {
         }
     }
     else if(messageText==='/set_iplist'){    
-        bot.sendMessage(chatId, `http://192.168.1.227/ITUtl/`);
+        bot.sendMessage(chatId, `http://192.168.1.227/itutl/`);
     }
     // catatan mikrotik
     else if(messageText==='/set_info'){
@@ -327,7 +327,7 @@ bot.on('message', (msg) => {
         bot.sendMessage(chatId, `list anydesk remot\n\n210766838 inacb\n269900226 linux server\n1867185632 linux proxmox\n953790503 win proxmox\n1819903078 adminakre`);
     }
     else if(messageText==='/help' || messageText.includes('/help')){    
-        let info = "help:\n\n/get_iplist\n\tliat semua ip list di pelita\n\n/set_iplist\n\tcrud semua ip list di pelita\n\n/set_info\n\tmembuat catatan kode mikrotik untuk koding jaringan\n\n /set_lembur\n\tbikin lemburan unit it\n\n/lembur_saya\n\tliat lemburan unit it\n\n/edit lembur : NIK_tgl\n\tedit lemburan, id lembur liat di lembur saya\n\n/get_remote_list\n\tliat list remote pc"
+        let info = "help:\n\n/get_iplist\n\tliat semua ip list di pelita\n\n/set_iplist\n\tcrud semua ip list di pelita dan web lembur\n\n/set_info\n\tmembuat catatan kode mikrotik untuk koding jaringan\n\n /set_lembur\n\tbikin lemburan unit it\n\n/lembur_saya\n\tliat lemburan unit it\n\n/edit lembur : NIK_tgl\n\tedit lemburan, id lembur liat di lembur saya\n\n/get_remote_list\n\tliat list remote pc\n\n/set_info\n\tbuat contoh catatan\n\t/get_catatan_mikrotik\n\t/edit_catatan_mikrotik\n\t/del_catatan_mikrotik"
         bot.sendMessage(chatId, info,{ parseMode: 'Markdown' });
     }else if(messageText==='/lapor_issue_mlite'){
         // githubIssueCreator.createIssue('hcalldee', 'mlite_rspi', 'module a error', 'module error ketika a', ['bug']);
