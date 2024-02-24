@@ -234,6 +234,7 @@ bot.on('message', (msg) => {
     else if(messageText==='/set_iplist'){    
         bot.sendMessage(chatId, `http://192.168.1.227/ITUtl/`);
     }
+    // catatan mikrotik
     else if(messageText==='/set_info'){
         bot.sendMessage(chatId, `berikut contoh buat catatan kode mikrotik\n\n*catatan_kode \nJudul : \nKet :\n`);
     }
@@ -266,12 +267,62 @@ bot.on('message', (msg) => {
             });
         }
     }
+    else if(messageText.includes('/del_catatan_mikrotik : ')){
+        let id = extractIdFromMessage(messageText);
+        if(id!=null){
+            crudModule.delete(id)
+                .then(result => {
+                    bot.sendMessage(chatId, `data berhasil dihapus`);
+                })
+                .catch(error => {
+                    console.error(error); // Handle errors if any
+                });
+        }else{
+            crudModule.read()
+            .then(result => {
+                bot.sendMessage(chatId, result.map(row => `${row.id} ${row.judul}`).join('\n'));
+            })
+            .catch(error => {
+                console.error(error); // Handle errors if any
+            });
+        }
+    }
+    else if(messageText.includes('/edit_catatan_mikrotik')){
+        let id = extractIdFromMessage(messageText);
+        if(id==null){
+            bot.sendMessage(chatId, `format yang benar /edit_catatan_mikrotik : 1`);
+        }else{
+            let query =`SELECT * FROM catatan_Infras where id = "${id}";`
+            db.connection.query(query, (error, results, fields) => {
+                if (error) {
+                    console.error('Error selecting messages from database:', error);
+                    return;
+                }
+                let data = results[0]
+                bot.sendMessage(chatId, `berikut contoh buat catatan kode mikrotik\n\n*catatan_kode_edit-${data.id} \nJudul : ${data.judul} \nKet :\n${data.Ket}`);
+            });
+        }
+    }
+    else if(messageText.includes('*catatan_kode_edit')){
+        // Extract the line using regular expression
+        // const result = messageText.match(/.*\*catatan_kode_edit.*/);
+        let id = messageText.match(/.*\*catatan_kode_edit.*/)[0].split('-')[1]
+        let data = convertTextToJson3(messageText)
+        crudModule.update(id,data)
+        .then(result => {
+            bot.sendMessage(chatId, `catatan kode berhasil diubah`);
+        })
+        .catch(error => {
+            console.error(error); // Handle errors if any
+        });
+    }
     else if(messageText.includes('*catatan_kode')){
         console.log(convertTextToJson3(messageText)); 
         data = convertTextToJson3(messageText)
         crudModule.create(data)
         bot.sendMessage(chatId, `catatan kode berhasil disimpan`);
     }
+
     else if(messageText==='/get_remote_list'){    
         bot.sendMessage(chatId, `list anydesk remot\n\n210766838 inacb\n269900226 linux server\n1867185632 linux proxmox\n953790503 win proxmox\n1819903078 adminakre`);
     }
