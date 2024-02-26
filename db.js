@@ -29,11 +29,11 @@ function insertData(data) {
     });
 }
 
-function editData(id, data) {
+function editData(id_edit, data) {
     return new Promise((resolve, reject) => {
-        const {tanggal, sub_judul, durasi, perihal } = data;
-        const sql = "UPDATE lembur_it SET tanggal = ?, sub_judul = ?, durasi = ?, perihal = ? WHERE id = ?";
-        const values = [tanggal, sub_judul, durasi, perihal, id];
+        const {tanggal, sub_judul, durasi, perihal, id} = data;
+        const sql = "UPDATE lembur_it SET tanggal = ?, sub_judul = ?, durasi = ?, perihal = ?, id = ? WHERE id = ?";
+        const values = [tanggal, sub_judul, durasi, perihal, id,id_edit];
 
         connection.query(sql, values, (err, result) => {
             if (err) {

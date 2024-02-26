@@ -350,6 +350,7 @@ bot.on('message', (msg) => {
             bot.sendMessage(chatId, `berikut contoh form lembur\n\n*form_lembur \nNama : ${data.Nama}\nNIK : ${data.NIK}\nJabatan : Staff IT \nTanggal : ${new Date().toISOString().slice(0, 10)}\nDurasi : \nPerihal :\n`);
         });
     }else if(messageText.includes('/edit lembur')){
+        // let id = messageText.match(/.*\*form_edit_lembur.*/)[0].split('-')[1]
         let id = extractIdFromMessage(messageText);
         if(id==null){
             bot.sendMessage(chatId, `format yang benar \"nik:tanggal\" tanpa strip\n contoh:\n /edit lembur : 474.100822_20240223`);
@@ -378,11 +379,10 @@ bot.on('message', (msg) => {
         });
     }
     else if(messageText.includes('*form_edit_lembur')){
-        let id = convertTextToJson(messageText, user).id
+        let id = messageText.match(/.*\*form_edit_lembur.*/)[0].split('-')[1]
         let data = convertTextToJson(messageText, user)
-        delete data.id;
+        data.id = generateRandomId(id.split('_')[0],data.tanggal);
         delete data.username;
-
         
         db.editData(id,data)
         .then(result => {
